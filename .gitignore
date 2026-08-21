@@ -1,8 +1,31 @@
-.venv/
+# Python
 __pycache__/
 *.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Env
 .env
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Alembic
+alembic/versions/__pycache__/
+
+# OS
+.DS_Store
+
+# Test/coverage
 .pytest_cache/
 .ruff_cache/
 .coverage
 htmlcov/
+
+# Logs
+*.log

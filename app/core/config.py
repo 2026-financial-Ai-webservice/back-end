@@ -1,22 +1,23 @@
-from functools import lru_cache
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = "Financial AI API"
-    environment: str = "local"
+    ENV: str = "local"
+    APP_NAME: str = "Financial-AI"
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
+    DATABASE_URL: str
+    REDIS_URL: str = "redis://localhost:6379/0"
+
+    DART_API_KEY: str = ""
+    KIS_APP_KEY: str = ""
+    KIS_APP_SECRET: str = ""
+    KIS_ACCOUNT_NO: str = ""
+
+    OPENAI_API_KEY: str = ""
+
+    SECRET_KEY: str = "change-me-in-production"
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
-@lru_cache
-def get_settings() -> Settings:
-    return Settings()
-
-
-settings = get_settings()
+settings = Settings()
