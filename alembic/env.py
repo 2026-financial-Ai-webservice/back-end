@@ -3,16 +3,15 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from alembic import context
 from app.core.config import settings
 from app.core.database import Base
 
 # 각 도메인 모델은 여기에 import되어야 autogenerate가 인식합니다.
 # 담당자가 model.py를 추가할 때 이 자리에 본인 도메인 import를 추가해주세요.
 # 예: from app.domain.company.model import CompanyMaster
-from app.domain.company.model import Company
 
 config = context.config
 config.set_main_option(
