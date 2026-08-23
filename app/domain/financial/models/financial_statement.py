@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import String, SmallInteger, BigInteger, Numeric, UniqueConstraint, ForeignKey
+from sqlalchemy import String, SmallInteger, BigInteger, Numeric, Text, UniqueConstraint, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import func, TIMESTAMP
 from app.core.database import Base
@@ -13,7 +13,7 @@ class FinancialStatement(Base):
     report_code: Mapped[str] = mapped_column(String(5), nullable=False)
     statement_scope: Mapped[str] = mapped_column(String(10), nullable=False)  # 연결/별도
     statement_type: Mapped[str] = mapped_column(String(20), nullable=True)     # BS/IS/CF...
-    account_id: Mapped[str] = mapped_column(String(100), nullable=True)
+    account_id: Mapped[str] = mapped_column(Text, nullable=True)
     account_name: Mapped[str] = mapped_column(String(200), nullable=False)
     current_amount: Mapped[float] = mapped_column(Numeric(24, 2), nullable=True)
     receipt_no: Mapped[str] = mapped_column(String(20), nullable=True)

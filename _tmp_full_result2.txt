@@ -1,0 +1,19 @@
+financial_ratios 전체 행: 3916
+revenue: 3793/3916 채움 (96.9%)
+operating_income: 3909/3916 채움 (99.8%)
+net_income: 3907/3916 채움 (99.8%)
+total_liabilities: 3849/3916 채움 (98.3%)
+total_equity: 3798/3916 채움 (97.0%)
+operating_cash_flow: 3891/3916 채움 (99.4%)
+capex: 3357/3916 채움 (85.7%)
+interest_expense: 3897/3916 채움 (99.5%)
+fcf: 3891/3916 채움 (99.4%)
+depreciation: 955/3916 채움 (24.4%)
+cash_and_equivalents: 3811/3916 채움 (97.3%)
+total_borrowings: 2977/3916 채움 (76.0%)
+roe: 3779/3916 채움 (96.5%)
+debt_ratio: 3779/3916 채움 (96.5%)
+interest_coverage: 3886/3916 채움 (99.2%)
+dps: 2319/3916 채움 (59.2%)
+
+roe = 0인 행: 1246

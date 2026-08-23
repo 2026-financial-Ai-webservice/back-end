@@ -48,6 +48,6 @@ async def collect_financial_statements(
         await session.commit()
 
 def _to_num(value: str | None):
-    if not value:
+    if not value or value == "-":
         return None
     return float(value.replace(",", ""))
