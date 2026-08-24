@@ -17,8 +17,8 @@ class KisClient:
     def __init__(self) -> None:
         self.base_url = settings.KIS_BASE_URL
 
-        if not settings.KIS_API_KEY:
-            raise KisApiError("KIS_API_KEY가 설정되지 않았습니다.")
+        if not settings.KIS_APP_KEY:
+            raise KisApiError("KIS_APP_KEY가 설정되지 않았습니다.")
         if not settings.KIS_APP_SECRET:
             raise KisApiError("KIS_APP_SECRET이 설정되지 않았습니다.")
         if not settings.KIS_ACCESS_TOKEN:
@@ -30,7 +30,7 @@ class KisClient:
         headers={
             "content-type": "application/json; charset=utf-8",
             "authorization": f"Bearer {settings.KIS_ACCESS_TOKEN}",
-            "appkey": settings.KIS_API_KEY,
+            "appkey": settings.KIS_APP_KEY,
             "appsecret": settings.KIS_APP_SECRET,
             "tr_id": self.STOCK_INFO_TR_ID,
             "custtype":"P"
