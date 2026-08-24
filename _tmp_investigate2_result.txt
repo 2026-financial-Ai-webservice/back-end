@@ -1,0 +1,4 @@
+(2024, 'CF', '당기순이익', 'ifrs-full_ProfitLoss', Decimal('102710507301.00'))
+(2024, 'CIS', '당기순이익', 'ifrs-full_ProfitLoss', Decimal('102710507301.00'))
+(2024, 'IS', '당기순이익', 'ifrs-full_ProfitLoss', Decimal('102710507301.00'))
+(2024, 'SCE', '당기순이익', 'ifrs-full_ProfitLoss', Decimal('0.00'))
