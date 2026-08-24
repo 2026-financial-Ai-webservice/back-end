@@ -15,6 +15,9 @@ from app.core.database import Base
 from app.domain.company.model import Company
 from app.domain.financial.models.financial_statement import FinancialStatement
 from app.domain.financial.models.financial_ratio import FinancialRatio
+from app.domain.marketdata.model import MarketData
+from app.domain.report.model import CompanyReport, ReportChunk
+
 
 config = context.config
 config.set_main_option(
