@@ -10,10 +10,15 @@ class Settings(BaseSettings):
 
     KIS_BASE_URL: str="https://openapi.koreainvestment.com:9443"
     DART_API_KEY: str = ""
-    KIS_API_KEY: str = ""
+    KIS_APP_KEY: str = ""
     KIS_APP_SECRET: str = ""
     KIS_ACCESS_TOKEN: str = ""
     KIS_ACCOUNT_NO: str = ""
+
+    MARKET_DATA_BATCH_ENABLED: bool = True
+    MARKET_DATA_BATCH_HOUR: int = 15
+    MARKET_DATA_BATCH_MINUTE: int = 40
+    MARKET_DATA_REQUEST_INTERVAL_SECONDS: float = 1.1
 
     OPENAI_API_KEY: str = ""
 
