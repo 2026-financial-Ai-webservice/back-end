@@ -17,6 +17,7 @@ from app.domain.financial.models.financial_statement import FinancialStatement
 from app.domain.financial.models.financial_ratio import FinancialRatio
 from app.domain.marketdata.model import MarketData
 from app.domain.report.model import CompanyReport, ReportChunk
+from app.domain.screening.models.fundamental_screening import FundamentalScreening
 
 
 config = context.config
