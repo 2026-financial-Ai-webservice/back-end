@@ -1,9 +1,10 @@
 import asyncio
+
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.domain.financial.collectors.company_lookup import get_corp_codes
-from app.domain.financial.collectors.financial_statements import YEARS
 from app.domain.financial.collectors.dividend import collect_dividend
+from app.domain.financial.collectors.financial_statements import YEARS
 
 
 async def main():

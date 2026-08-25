@@ -8,9 +8,9 @@ Create Date: 2026-08-24
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-from alembic import op
 from pgvector.sqlalchemy import Vector
 
+from alembic import op
 
 revision: str = "f0e2b24ebebc"
 down_revision: str | None = "b7d9c2a04f31"

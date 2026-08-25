@@ -1,5 +1,6 @@
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.domain.financial.collectors.dart_client import dart_get
 from app.domain.financial.models.financial_ratio import FinancialRatio
 

@@ -1,8 +1,9 @@
 import asyncio
+
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.domain.financial.collectors.company_lookup import get_corp_codes
-from app.domain.financial.collectors.financial_statements import collect_financial_statements, YEARS
+from app.domain.financial.collectors.financial_statements import YEARS, collect_financial_statements
 from app.domain.financial.collectors.ratio_calculator import calculate_ratios
 
 

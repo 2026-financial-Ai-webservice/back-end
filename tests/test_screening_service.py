@@ -1,5 +1,5 @@
-import pytest
 from app.domain.screening.service import is_fcf_3yr_negative
+
 
 # fcf가 모두 음수일 경우 True 반환
 def test_is_fcf_3yr_negative_all_negative():

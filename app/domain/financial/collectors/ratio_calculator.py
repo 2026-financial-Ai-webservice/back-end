@@ -1,8 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.domain.financial.models.financial_statement import FinancialStatement
+
 from app.domain.financial.models.financial_ratio import FinancialRatio
+from app.domain.financial.models.financial_statement import FinancialStatement
 
 # 이미 잘 맞는 것들은 그대로 account_name 유지
 ACCOUNT_MAP = {
@@ -50,7 +51,9 @@ AMORTIZATION_ACCOUNT_IDS = [
     "ifrs-full_AdjustmentsForAmortisationExpense",
 ]
 
-async def _fetch_statement_rows(session: AsyncSession, dart_corp_code: str, business_year: int, scope: str):
+async def _fetch_statement_rows(
+        session: AsyncSession, dart_corp_code: str, business_year: int, scope: str
+):
     result = await session.execute(
         select(FinancialStatement).where(
             FinancialStatement.corp_code == dart_corp_code,
@@ -71,7 +74,11 @@ async def calculate_ratios(
         return
 
     acc = {r.account_name: float(r.current_amount or 0) for r in rows if r.statement_type != "SCE"}
-    acc_by_id = {r.account_id: float(r.current_amount or 0) for r in rows if r.account_id and r.statement_type != "SCE"}
+    acc_by_id = {
+        r.account_id: float(r.current_amount or 0)
+        for r in rows
+        if r.account_id and r.statement_type != "SCE"
+    }
 
     def pick(ids: list[str]):
         return next((acc_by_id[i] for i in ids if i in acc_by_id), None)
@@ -95,7 +102,11 @@ async def calculate_ratios(
 
     dep_ppe = pick(DEPRECIATION_ACCOUNT_IDS)
     amortization = pick(AMORTIZATION_ACCOUNT_IDS)
-    depreciation = None if dep_ppe is None and amortization is None else (dep_ppe or 0) + (amortization or 0)
+    depreciation = (
+        None
+        if dep_ppe is None and amortization is None
+        else (dep_ppe or 0) + (amortization or 0)
+    )
 
     fcf = operating_cf - capex if values["operating_cash_flow"] is not None else None
     roe = (net_income / total_equity * 100) if total_equity else None
@@ -125,9 +136,14 @@ async def calculate_ratios(
     )
     stmt = stmt.on_conflict_do_update(
         constraint="uq_financial_ratio",
-        set_={c.name: getattr(stmt.excluded, c.name)
-              for c in FinancialRatio.__table__.columns
-              if c.name not in ("financial_ratios_id", "corp_code", "business_year", "report_code", "created_at", "dps")},
+        set_={
+            c.name: getattr(stmt.excluded, c.name)
+            for c in FinancialRatio.__table__.columns
+            if c.name
+            not in ("financial_ratios_id", "corp_code", "business_year",
+                    "report_code", "created_at", "dps"
+                    )
+        },
     )
     await session.execute(stmt)
     await session.commit()

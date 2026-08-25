@@ -1,9 +1,10 @@
 from sqlalchemy import text
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.engine import Row
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.domain.screening.models.fundamental_screening import FundamentalScreening
+
 
 async def get_latest_snapshot(session: AsyncSession) -> list[Row]:
     """회사별 가장 최신 연도의 financial_ratios + market_data + companies 스냅샷"""

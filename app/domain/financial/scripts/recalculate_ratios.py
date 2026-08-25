@@ -1,8 +1,10 @@
 import asyncio
+
 from app.core.database import AsyncSessionLocal
 from app.domain.financial.collectors.company_lookup import get_corp_codes
 from app.domain.financial.collectors.financial_statements import YEARS
 from app.domain.financial.collectors.ratio_calculator import calculate_ratios
+
 
 async def main():
     async with AsyncSessionLocal() as session:

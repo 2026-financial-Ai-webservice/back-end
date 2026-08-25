@@ -7,7 +7,6 @@ from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.domain.marketdata.service import collect_market_data
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -4,7 +4,6 @@ import logging
 from app.core.database import AsyncSessionLocal
 from app.domain.marketdata.service import collect_market_data
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s - %(message)s",

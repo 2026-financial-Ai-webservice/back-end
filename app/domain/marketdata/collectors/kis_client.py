@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 import httpx
@@ -32,15 +32,15 @@ class KisMarketDataClient:
         )
         self._token = settings.KIS_ACCESS_TOKEN or None
         self._token_expires_at = (
-            datetime.max.replace(tzinfo=timezone.utc)
+            datetime.max.replace(tzinfo=UTC)
             if self._token
-            else datetime.min.replace(tzinfo=timezone.utc)
+            else datetime.min.replace(tzinfo=UTC)
         )
         self._token_lock = asyncio.Lock()
         self._request_lock = asyncio.Lock()
         self._last_request_at = 0.0
 
-    async def __aenter__(self) -> "KisMarketDataClient":
+    async def __aenter__(self) -> KisMarketDataClient:
         return self
 
     async def __aexit__(self, *_: object) -> None:
@@ -50,7 +50,7 @@ class KisMarketDataClient:
         await self._client.aclose()
 
     async def _access_token(self) -> str:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         async with self._token_lock:
             if self._token and now < self._token_expires_at:
                 return self._token
@@ -59,7 +59,7 @@ class KisMarketDataClient:
     async def issue_access_token(self) -> str:
         """기존 .env 토큰과 관계없이 새 Access Token을 발급한다."""
         async with self._token_lock:
-            return await self._issue_access_token(datetime.now(timezone.utc))
+            return await self._issue_access_token(datetime.now(UTC))
 
     async def _issue_access_token(self, issued_at: datetime) -> str:
         response = await self._client.post(

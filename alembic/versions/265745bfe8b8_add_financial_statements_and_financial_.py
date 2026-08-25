@@ -5,17 +5,17 @@ Revises: 8c42a7bc91d2
 Create Date: 2026-08-23 18:46:30.488145
 
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = '265745bfe8b8'
-down_revision: Union[str, Sequence[str], None] = '8c42a7bc91d2'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = '8c42a7bc91d2'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -42,7 +42,9 @@ def upgrade() -> None:
     sa.Column('debt_ratio', sa.Numeric(precision=12, scale=6), nullable=True),
     sa.Column('interest_coverage', sa.Numeric(precision=12, scale=6), nullable=True),
     sa.Column('dps', sa.Numeric(precision=18, scale=4), nullable=True),
-    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column(
+        'created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False
+    ),
     sa.ForeignKeyConstraint(['corp_code'], ['companies.corp_code'], ),
     sa.PrimaryKeyConstraint('financial_ratios_id'),
     sa.UniqueConstraint('corp_code', 'business_year', 'report_code', name='uq_financial_ratio')
@@ -58,10 +60,16 @@ def upgrade() -> None:
     sa.Column('account_name', sa.String(length=200), nullable=False),
     sa.Column('current_amount', sa.Numeric(precision=24, scale=2), nullable=True),
     sa.Column('receipt_no', sa.String(length=20), nullable=True),
-    sa.Column('collected_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column(
+        'collected_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False
+    ),
     sa.ForeignKeyConstraint(['corp_code'], ['companies.corp_code'], ),
     sa.PrimaryKeyConstraint('financial_id'),
-    sa.UniqueConstraint('corp_code', 'business_year', 'report_code', 'statement_scope', 'statement_type', 'account_id', name='uq_financial_statement')
+    sa.UniqueConstraint(
+        'corp_code', 'business_year', 'report_code',
+        'statement_scope', 'statement_type', 'account_id',
+        name='uq_financial_statement'
+    )
     )
     # ### end Alembic commands ###
 

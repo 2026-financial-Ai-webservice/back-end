@@ -1,7 +1,9 @@
 import asyncio
-from app.core.config import settings
-from app.core.database import AsyncSessionLocal
+
 from sqlalchemy import text
+
+from app.core.database import AsyncSessionLocal
+
 
 async def main():
     async with AsyncSessionLocal() as session:
