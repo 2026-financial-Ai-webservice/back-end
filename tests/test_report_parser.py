@@ -2,6 +2,8 @@ import io
 import zipfile
 from datetime import date
 
+import pytest
+
 from app.domain.report.dart_client import map_disclosure
 from app.domain.report.parser import extract_document, parse_report_chunks
 
