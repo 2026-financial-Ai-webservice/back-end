@@ -1,5 +1,6 @@
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.domain.financial.collectors.dart_client import dart_get
 from app.domain.financial.models.financial_statement import FinancialStatement
 

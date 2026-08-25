@@ -12,12 +12,12 @@ from app.core.database import Base
 # 각 도메인 모델은 여기에 import되어야 autogenerate가 인식합니다.
 # 담당자가 model.py를 추가할 때 이 자리에 본인 도메인 import를 추가해주세요.
 # 예: from app.domain.company.model import CompanyMaster
-from app.domain.company.model import Company
-from app.domain.financial.models.financial_statement import FinancialStatement
-from app.domain.financial.models.financial_ratio import FinancialRatio
-from app.domain.marketdata.model import MarketData
-from app.domain.report.model import CompanyReport, ReportChunk
-
+from app.domain.company.model import Company  # noqa: F401
+from app.domain.financial.models.financial_ratio import FinancialRatio  # noqa: F401
+from app.domain.financial.models.financial_statement import FinancialStatement  # noqa: F401
+from app.domain.marketdata.model import MarketData  # noqa: F401
+from app.domain.report.model import CompanyReport, ReportChunk  # noqa: F401
+from app.domain.screening.models.fundamental_screening import FundamentalScreening  # noqa: F401
 
 config = context.config
 config.set_main_option(

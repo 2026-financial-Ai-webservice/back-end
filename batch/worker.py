@@ -4,7 +4,6 @@ import logging
 from app.core.database import engine
 from batch.scheduler import create_scheduler
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s - %(message)s",
