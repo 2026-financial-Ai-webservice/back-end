@@ -56,3 +56,31 @@ async def replace_report(
     )
     await session.flush()
     return report_id
+
+
+async def get_unembedded_report_chunks(
+    session: AsyncSession,
+    limit: int,
+) -> list[ReportChunk]:
+    if limit < 1:
+        raise ValueError("limit은 1 이상이어야 합니다.")
+    statement = (
+        select(ReportChunk)
+        .where(ReportChunk.embedding.is_(None))
+        .order_by(ReportChunk.chunk_id)
+        .limit(limit)
+    )
+    result = await session.execute(statement)
+    return list(result.scalars().all())
+
+
+async def save_chunk_embeddings(
+    session: AsyncSession,
+    chunks: list[ReportChunk],
+    embeddings: list[list[float]],
+) -> None:
+    if len(chunks) != len(embeddings):
+        raise ValueError("청크와 임베딩 개수가 일치하지 않습니다.")
+    for chunk, embedding in zip(chunks, embeddings, strict=True):
+        chunk.embedding = embedding
+    await session.flush()
