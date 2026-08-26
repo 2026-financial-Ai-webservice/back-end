@@ -7,6 +7,7 @@ from openai import AsyncOpenAI, OpenAIError
 
 from app.core.config import settings
 
+
 class ReportEmbeddingError(RuntimeError):
     pass
 
