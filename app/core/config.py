@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     MARKET_DATA_REQUEST_INTERVAL_SECONDS: float = 1.1
 
     OPENAI_API_KEY: str = ""
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
+    OPENAI_EMBEDDING_DIMENSIONS: int = 1536
+    OPENAI_EMBEDDING_BATCH_SIZE: int = 100
 
     SECRET_KEY: str = "change-me-in-production"
 
