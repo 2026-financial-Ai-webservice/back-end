@@ -1,6 +1,7 @@
 import datetime
 from sqlalchemy import (
     TIMESTAMP,
+    ForeignKey,
     BigInteger,
     Numeric,
     String,
@@ -17,12 +18,9 @@ class PortfolioResult(Base):
     portfolio_result_id: Mapped[int] = mapped_column(
         BigInteger, primary_key=True, autoincrement=True
     )
-    # 요청 파라미터 스냅샷 (요청 내용 보존)
-    seed_money: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    investment_period: Mapped[str] = mapped_column(String(30), nullable=False)
-    risk_preference: Mapped[str] = mapped_column(String(30), nullable=False)
-    return_preference: Mapped[str] = mapped_column(String(30), nullable=False)
-    valuation_preference: Mapped[str] = mapped_column(String(30), nullable=False)
+    request_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("portfolio_request.request_id"), nullable=False
+    )
 
     # 집계 분석 결과
     total_investment: Mapped[int] = mapped_column(BigInteger, nullable=False)

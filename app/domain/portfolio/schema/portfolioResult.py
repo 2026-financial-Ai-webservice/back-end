@@ -12,7 +12,7 @@ class CompanyResult(CamelModel):
     allocated_amount: int
     final_score: int
     rank_no: int
-    ev_ebitda: float
+    per: float
     roe: float
     dcf: float
     investment_reason: str
