@@ -9,6 +9,8 @@ from app.domain.marketdata.service import collect_market_data
 from app.domain.valuation.scripts.run_daily_valuation import (
     run_daily_valuation,
 )
+
+
 logger = logging.getLogger(__name__)
 
 
