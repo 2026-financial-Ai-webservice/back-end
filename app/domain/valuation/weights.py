@@ -26,7 +26,7 @@ def calculate_weights(
     dividend = BASE_DIVIDEND_WEIGHT
 
     # 배당선호도
-    if preferences.return_preference == "CASH_FLOW":
+    if preferences.return_preference == "DIVIDEND":
         dividend += Decimal("15")
         per -= Decimal("7.5")
 
@@ -37,7 +37,7 @@ def calculate_weights(
     else:
         raise ValueError(
             "return_preference must be "
-            "CASH_FLOW or CAPITAL_GAIN"
+            "DIVIDEND or CAPITAL_GAIN"
         )
 
     # 가치평가지표 선호도
@@ -56,21 +56,21 @@ def calculate_weights(
         )
 
     # 투자가능기간
-    if preferences.investment_period == "UNDER_ONE_YEAR":
+    if preferences.investment_period == "UNDER_1_YEAR":
         per += Decimal("10")
 
     elif preferences.investment_period == "ONE_TO_THREE_YEARS":
         per += Decimal("5")
         dcf += Decimal("5")
 
-    elif preferences.investment_period == "OVER_THREE_YEARS":
+    elif preferences.investment_period == "OVER_3_YEARS":
         dcf += Decimal("10")
 
     else:
         raise ValueError(
             "investment_period must be "
-            "UNDER_ONE_YEAR, ONE_TO_THREE_YEARS, "
-            "or OVER_THREE_YEARS"
+            "UNDER_1_YEAR, ONE_TO_THREE_YEARS, "
+            "or OVER_3_YEARS"
         )
 
     # 위험성향
