@@ -1,10 +1,9 @@
 """백분위, 가중치, 총점, 순위 계산"""
 
 from dataclasses import dataclass, replace
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 from app.domain.valuation.metrics import RawValuationMetrics
-
 
 SCORE_PRECISION=Decimal("0.0001")
 

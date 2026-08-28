@@ -35,7 +35,6 @@ from app.domain.valuation.weights import (
     calculate_weights,
 )
 
-
 logger = logging.getLogger(__name__)
 
 

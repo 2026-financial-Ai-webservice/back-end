@@ -3,7 +3,6 @@ from decimal import Decimal
 
 from app.domain.valuation.scoring import ValuationWeights
 
-
 BASE_DCF_WEIGHT = Decimal("34")
 BASE_PER_WEIGHT = Decimal("33")
 BASE_DIVIDEND_WEIGHT = Decimal("33")

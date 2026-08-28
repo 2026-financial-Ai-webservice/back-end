@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import(
+from sqlalchemy import (
     BigInteger,
     CheckConstraint,
     DateTime,
@@ -11,7 +11,7 @@ from sqlalchemy import(
     Numeric,
     String,
     UniqueConstraint,
-    func
+    func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
