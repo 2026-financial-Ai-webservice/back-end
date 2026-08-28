@@ -50,7 +50,6 @@ def upgrade() -> None:
         sa.Column(
             "filing_date",
             sa.Date(),
-            nullable=True,
         ),
         sa.Column(
             "business_year",
@@ -117,7 +116,7 @@ def upgrade() -> None:
             "major_section",
             "minor_section",
             "chunk_order",
-            name="uq_report_chunk_order",
+            name="report_chunks_report_id_major_section_minor_section_chunk_o_key",
         ),
     )
 

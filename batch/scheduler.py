@@ -6,7 +6,9 @@ from apscheduler.triggers.cron import CronTrigger
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.domain.marketdata.service import collect_market_data
-
+from app.domain.valuation.scripts.run_daily_valuation import (
+    run_daily_valuation,
+)
 logger = logging.getLogger(__name__)
 
 
@@ -22,9 +24,14 @@ async def run_market_data_job() -> None:
             saved_count,
         )
 
+        await run_daily_valuation()
+        logger.info("valuation 갱신이 완료되었습니다.")
+
     except Exception:
         logger.exception("시장 데이터 배치가 실패했습니다.")
         raise
+
+    
 
 
 def create_scheduler() -> AsyncIOScheduler:
@@ -41,7 +48,7 @@ def create_scheduler() -> AsyncIOScheduler:
             timezone="Asia/Seoul",
         ),
         id="collect_market_data",
-        name="국내주식 시장 데이터 수집",
+        name="collect_market_data_and_valuation",
         replace_existing=True,
         coalesce=True,
         max_instances=1,
