@@ -1,0 +1,5 @@
+filing_date nullable: [('filing_date', 'YES')]
+report_chunks unique 제약 이름: [('report_chunks_report_id_major_section_minor_section_chunk_o_key',)]
+company_reports 최근 수집 시각: 2026-08-24 12:21:34.985109+00:00
+company_reports 행수: 989
+report_chunks 행수: 64925
