@@ -4,7 +4,7 @@ from app.domain.portfolio.schema.schemaEnum import (
     InvestmentPeriod,
     ReturnPreference,
     RiskPreference,
-    ValuationPreference
+    ValuationPreference,
 )
 
 

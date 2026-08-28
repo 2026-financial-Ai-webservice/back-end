@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class CompanyReason(BaseModel):
     corp_code: str
     investment_reason: str

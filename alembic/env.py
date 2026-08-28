@@ -16,10 +16,11 @@ from app.domain.company.model import Company  # noqa: F401
 from app.domain.financial.models.financial_ratio import FinancialRatio  # noqa: F401
 from app.domain.financial.models.financial_statement import FinancialStatement  # noqa: F401
 from app.domain.marketdata.model import MarketData  # noqa: F401
+from app.domain.portfolio.models.portfolioResultCompany import PortfolioResultCompany  # noqa: F401
+from app.domain.portfolio.models.portfolioResultModel import PortfolioResult  # noqa: F401
 from app.domain.report.model import CompanyReport, ReportChunk  # noqa: F401
 from app.domain.screening.models.fundamental_screening import FundamentalScreening  # noqa: F401
-from app.domain.portfolio.models.portfolioResultModel import PortfolioResult # noqa: F401
-from app.domain.portfolio.models.portfolioResultCompany import PortfolioResultCompany # noqa: F401
+from app.domain.valuation.model import PortfolioRequest  # noqa: F401
 
 config = context.config
 config.set_main_option(

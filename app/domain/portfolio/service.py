@@ -1,20 +1,27 @@
 import secrets
+
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.domain.portfolio.allocation import allocate_portfolio
 from app.domain.portfolio.llm_client import generate_portfolio_analysis
 from app.domain.portfolio.models import PortfolioResult, PortfolioResultCompany
 from app.domain.portfolio.prompt import build_prompt
-from app.domain.portfolio.schema.portfolioResult import PortfolioResultResponse, CompanyResult
+from app.domain.portfolio.schema.portfolioResult import CompanyResult, PortfolioResultResponse
 
 
 async def build_portfolio_result(
         session: AsyncSession,
         request_id: int,
         seed_money: int,
-        user_preferences: dict,            # investment_period, risk_preference, return_preference, valuation_preference
-        scores: dict[str, float],          # {corp_code: score} - 2, 3단계 merge 끝난 상태로 전달받음
-        company_details: dict[str, dict],  # {corp_code: {company_name, per, pbr, market_cap, roe, dcf, business_summary}}
+        # investment_period, risk_preference,
+        # return_preference, valuation_preference
+        user_preferences: dict,
+        # {corp_code: score} - 2, 3단계 merge 끝난 상태로 전달받음
+        scores: dict[str, float],
+        # {corp_code: {company_name, per, pbr, market_cap,
+        # roe, dcf, business_summary}}
+        company_details: dict[str, dict],
 ) -> PortfolioResultResponse:
     """allocation(할당 비율) 계산 -> LLM 호출 -> DB 저장 -> 최종 응답 조립"""
 
@@ -48,9 +55,12 @@ async def build_portfolio_result(
 
     # 집계값
     total_investment = sum(a["amount"] for a in allocations.values())
-    dividend_values = [d["dividend_yield"] for d in company_details.values() if d.get("dividend_yield") is not None]
-    dcf_values = [d["dcf"] for d in company_details.values() if d.get("dcf") is not None]
-    average_dividend_yield = round(sum(dividend_values) / len(dividend_values), 2) if dividend_values else None
+    dividend_values = [d["dividend_yield"] for d in company_details.values()
+                       if d.get("dividend_yield") is not None]
+    dcf_values = [d["dcf"] for d in company_details.values()
+                  if d.get("dcf") is not None]
+    average_dividend_yield = (
+        round(sum(dividend_values) / len(dividend_values), 2)) if dividend_values else None
     average_dcf_upside = round(sum(dcf_values) / len(dcf_values), 2) if dcf_values else None
     share_token = secrets.token_urlsafe(32)
 

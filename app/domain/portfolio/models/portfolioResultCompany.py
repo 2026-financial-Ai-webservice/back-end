@@ -1,15 +1,16 @@
-import datetime
+
 from sqlalchemy import (
-    ForeignKey,
     BigInteger,
-    SmallInteger,
+    ForeignKey,
     Numeric,
+    SmallInteger,
     String,
     Text,
 )
-
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
+
 
 class PortfolioResultCompany(Base):
     __tablename__ = "portfolio_result_companies"
@@ -30,4 +31,4 @@ class PortfolioResultCompany(Base):
     roe: Mapped[float] = mapped_column(Numeric(8, 2), nullable=True)
     dcf: Mapped[float] = mapped_column(Numeric(8, 2), nullable=True)
     investment_reason: Mapped[str] = mapped_column(Text, nullable=True)
-    portfolio_result: Mapped["PortfolioResult"] = relationship(back_populates="companies")
+    portfolio_result: Mapped["PortfolioResult"] = relationship(back_populates="companies")  # noqa: F821

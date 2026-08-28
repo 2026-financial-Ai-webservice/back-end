@@ -1,14 +1,15 @@
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
-from datetime import datetime, timezone
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.database import engine
 from app.domain.company.router import router as company_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -39,7 +40,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(
         status_code=400,
         content={
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "status": 400,
             "error": "Illegal Argument",
             "message": str(exc.errors()),
@@ -52,7 +53,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "status": 500,
             "error": "Server Error",
             "message": str(exc) or "서버 오류가 발생했습니다.",

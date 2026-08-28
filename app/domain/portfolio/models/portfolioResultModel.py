@@ -1,16 +1,18 @@
 import datetime
+
 from sqlalchemy import (
     TIMESTAMP,
-    ForeignKey,
     BigInteger,
+    ForeignKey,
     Numeric,
     String,
     Text,
     func,
 )
-
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
+
 
 class PortfolioResult(Base):
     __tablename__ = "portfolio_results"
@@ -33,6 +35,6 @@ class PortfolioResult(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         TIMESTAMP(timezone=True), server_default=func.now(), nullable=False
     )
-    companies: Mapped[list["PortfolioResultCompany"]] = relationship(
+    companies: Mapped[list["PortfolioResultCompany"]] = relationship(   # noqa: F821
         back_populates="portfolio_result", cascade="all, delete-orphan"
     )

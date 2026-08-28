@@ -1,18 +1,19 @@
-from enum import Enum
+from enum import StrEnum
 
-class InvestmentPeriod(str, Enum):
+
+class InvestmentPeriod(StrEnum):
     UNDER_1_YEAR = "UNDER_1_YEAR"
     ONE_TO_THREE_YEARS = "ONE_TO_THREE_YEARS"
     OVER_3_YEARS = "OVER_3_YEARS"
 
-class RiskPreference(str, Enum):
+class RiskPreference(StrEnum):
     STABLE = "STABLE"
     AGGRESSIVE = "AGGRESSIVE"
 
-class ReturnPreference(str, Enum):
+class ReturnPreference(StrEnum):
     DIVIDEND = "DIVIDEND"
     CAPITAL_GAIN = "CAPITAL_GAIN"
 
-class ValuationPreference(str, Enum):
+class ValuationPreference(StrEnum):
     CURRENT_ASSET = "CURRENT_ASSET"
     FUTURE_EARNINGS = "FUTURE_EARNINGS"

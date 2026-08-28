@@ -5,17 +5,17 @@ Revises: 8f74b922efcf
 Create Date: 2026-08-27 20:58:48.852375
 
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = 'bf09e2b084e8'
-down_revision: Union[str, Sequence[str], None] = '8f74b922efcf'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = '8f74b922efcf'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -35,7 +35,8 @@ def upgrade() -> None:
     sa.Column('market_indicator_analysis', sa.Text(), nullable=True),
     sa.Column('allocation_analysis', sa.Text(), nullable=True),
     sa.Column('share_token', sa.String(length=64), nullable=False),
-    sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.TIMESTAMP(timezone=True),
+              server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('portfolio_result_id'),
     sa.UniqueConstraint('share_token')
     )

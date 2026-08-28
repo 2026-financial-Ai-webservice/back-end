@@ -92,3 +92,41 @@ class ValuationResult(Base):
             name="uq_valuation_result_request_company",
         ),
     )
+
+class PortfolioRequest(Base):
+    __tablename__ = "portfolio_request"
+
+    request_id: Mapped[int] = mapped_column(
+        BigInteger, Identity(always=True), primary_key=True
+    )
+    seed_money: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    investment_period: Mapped[str] = mapped_column(String(20), nullable=False)
+    risk_preference: Mapped[str] = mapped_column(String(20), nullable=False)
+    return_preference: Mapped[str] = mapped_column(String(20), nullable=False)
+    valuation_preference: Mapped[str] = mapped_column(String(20), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "seed_money > 0", name="ck_portfolio_request_seed_money_positive"
+        ),
+        CheckConstraint(
+            "investment_period IN ('UNDER_1_YEAR', 'ONE_TO_THREE_YEARS', 'OVER_3_YEARS')",
+            name="ck_portfolio_request_investment_period",
+        ),
+        CheckConstraint(
+            "risk_preference IN ('STABLE', 'AGGRESSIVE')",
+            name="ck_portfolio_request_risk_preference",
+        ),
+        CheckConstraint(
+            "return_preference IN ('DIVIDEND', 'CAPITAL_GAIN')",
+            name="ck_portfolio_request_return_preference",
+        ),
+        CheckConstraint(
+            "valuation_preference IN ('CURRENT_ASSET', 'FUTURE_EARNINGS')",
+            name="ck_portfolio_request_valuation_preference",
+        ),
+    )
+
