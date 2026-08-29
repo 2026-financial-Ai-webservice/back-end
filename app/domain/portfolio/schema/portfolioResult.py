@@ -11,7 +11,7 @@ class CompanyResult(CamelModel):
     company_name: str
     corp_code: str
     allocated_amount: int
-    final_score: int
+    final_score: float
     rank_no: int
     per: float
     roe: float

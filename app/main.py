@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.database import engine
 from app.domain.company.router import router as company_router
+from app.domain.portfolio.router import router as portfolio_router
 
 
 @asynccontextmanager
@@ -29,6 +30,7 @@ app.add_middleware(
 )
 
 app.include_router(company_router)
+app.include_router(portfolio_router)
 
 
 @app.get("/health")

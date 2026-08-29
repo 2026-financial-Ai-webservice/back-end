@@ -124,6 +124,108 @@ async def retrieve_candidate_evidence(
             await active_embedder.aclose()
 
 
+def calculate_company_rag_score(
+    evidence: CompanyRagEvidence,
+) -> float:
+    """기업의 검색 목적별 최고 유사도를 평균하여 RAG 점수를 계산한다.
+
+    검색 결과가 없는 목적은 0점으로 처리한다. 따라서 일부 목적에서만
+    높은 유사도를 받은 기업보다 여러 투자 목적에서 고르게 근거가 검색된
+    기업이 높은 점수를 받는다.
+    """
+    if not evidence.searches:
+        return 0.0
+
+    purpose_scores: list[float] = []
+
+    for search in evidence.searches:
+        if not search.chunks:
+            purpose_scores.append(0.0)
+            continue
+
+        best_similarity = max(
+            chunk.similarity
+            for chunk in search.chunks
+        )
+
+        # 음수 cosine similarity는 선정 점수에서 0으로 처리한다.
+        purpose_scores.append(
+            max(0.0, best_similarity)
+        )
+
+    return sum(purpose_scores) / len(purpose_scores)
+
+
+#corp_code 리스트 반환
+async def select_company_codes_with_rag(
+    session: AsyncSession,
+    *,
+    corp_codes: Sequence[str],
+    investment_period: InvestmentPeriod,
+    risk_preference: RiskPreference,
+    return_preference: ReturnPreference,
+    valuation_preference: ValuationPreference,
+    limit: int = 7,
+    top_k_per_company: int = 3,
+    minimum_chunk_similarity: float | None = 0.3,
+    minimum_company_score: float = 0.0,
+    embedder: TextEmbedder | None = None,
+) -> list[str]:
+    """사업보고서 RAG 점수가 높은 기업코드를 순서대로 반환한다."""
+    if limit < 1:
+        raise ValueError(
+            "limit은 1 이상이어야 합니다."
+        )
+
+    if not 0.0 <= minimum_company_score <= 1.0:
+        raise ValueError(
+            "minimum_company_score는 "
+            "0.0 이상 1.0 이하여야 합니다."
+        )
+
+    evidence_by_company = await retrieve_candidate_evidence(
+        session,
+        corp_codes=corp_codes,
+        investment_period=investment_period,
+        risk_preference=risk_preference,
+        return_preference=return_preference,
+        valuation_preference=valuation_preference,
+        top_k_per_company=top_k_per_company,
+        minimum_similarity=minimum_chunk_similarity,
+        embedder=embedder,
+    )
+
+    scores = {
+        corp_code: calculate_company_rag_score(
+            evidence
+        )
+        for corp_code, evidence
+        in evidence_by_company.items()
+    }
+
+    eligible_codes = [
+        corp_code
+        for corp_code, score in scores.items()
+        if score >= minimum_company_score
+        and any(
+            search.chunks
+            for search
+            in evidence_by_company[corp_code].searches
+        )
+    ]
+
+    # 점수가 같으면 corp_code 오름차순으로 정렬해 결과를 항상 동일하게 만든다.
+    eligible_codes.sort(
+        key=lambda corp_code: (
+            -scores[corp_code],
+            corp_code,
+        )
+    )
+
+    return eligible_codes[:limit]
+
+
+ 
 def _append_search_results(
     *,
     result: dict[str, CompanyRagEvidence],
@@ -201,3 +303,81 @@ def _normalize_corp_codes(
         normalized.append(code)
 
     return normalized
+
+
+def format_company_evidence(
+    evidence: CompanyRagEvidence | None,
+    *,
+    max_chunks: int = 6,
+    max_content_chars: int = 700,
+) -> str:
+    """기업별 RAG 검색 결과를 LLM 프롬프트용 문자열로 변환한다."""
+    if max_chunks < 1:
+        raise ValueError("max_chunks는 1 이상이어야 합니다.")
+
+    if max_content_chars < 1:
+        raise ValueError(
+            "max_content_chars는 1 이상이어야 합니다."
+        )
+
+    if evidence is None:
+        return "검색된 사업보고서 근거 없음"
+
+    candidates: list[tuple[str, ReportEvidence]] = []
+    seen_chunk_ids: set[int] = set()
+
+    for search in evidence.searches:
+        for chunk in search.chunks:
+            # 여러 검색 목적에서 같은 청크가 검색될 수 있으므로 중복 제거
+            if chunk.chunk_id in seen_chunk_ids:
+                continue
+
+            seen_chunk_ids.add(chunk.chunk_id)
+            candidates.append((search.purpose, chunk))
+
+    candidates.sort(
+        key=lambda item: item[1].similarity,
+        reverse=True,
+    )
+    selected = candidates[:max_chunks]
+
+    if not selected:
+        return "검색된 사업보고서 근거 없음"
+
+    lines: list[str] = []
+
+    for index, (purpose, chunk) in enumerate(
+        selected,
+        start=1,
+    ):
+        section = " > ".join(
+            value
+            for value in (
+                chunk.major_section,
+                chunk.minor_section,
+            )
+            if value
+        )
+
+        if not section:
+            section = "섹션 정보 없음"
+
+        # 불필요한 줄바꿈과 공백을 정리한다.
+        content = " ".join(chunk.content.split())
+
+        if len(content) > max_content_chars:
+            content = (
+                f"{content[:max_content_chars].rstrip()}…"
+            )
+
+        lines.append(
+            f"[{index}] "
+            f"목적={purpose}; "
+            f"보고서={chunk.report_name}; "
+            f"공시일={chunk.filing_date}; "
+            f"섹션={section}; "
+            f"유사도={chunk.similarity:.4f}\n"
+            f"{content}"
+        )
+
+    return "\n".join(lines)
