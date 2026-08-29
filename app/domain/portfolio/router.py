@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -10,14 +10,42 @@ from app.domain.portfolio.repository import (
 )
 from app.domain.portfolio.schema.portfolioCreateRequest import PortfolioCreateRequest
 from app.domain.portfolio.schema.portfolioResult import PortfolioResultResponse
-from app.domain.portfolio.service import build_portfolio_result
+from app.domain.portfolio.service import build_portfolio_result, retrieve_portfolio_result
 from app.domain.valuation.service import run_valuation_for_request
-
 
 router = APIRouter(
     prefix="/portfolios",
     tags=["portfolios"],
 )
+
+
+@router.get(
+    "/{shareToken}",
+    response_model=PortfolioResultResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_portfolio(
+    share_token: Annotated[
+        str,
+        Path(
+            alias="shareToken",
+            min_length=1,
+            max_length=64,
+        ),
+    ],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> PortfolioResultResponse:
+    result = await retrieve_portfolio_result(
+        session,
+        share_token=share_token,
+    )
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="포트폴리오를 찾을 수 없습니다.",
+        )
+
+    return result
 
 
 @router.post(

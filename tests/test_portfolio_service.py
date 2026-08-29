@@ -133,5 +133,4 @@ async def test_build_portfolio_result_uses_only_rag_selected_companies(
 
     stored_companies = session.execute.await_args_list[1].args[1]
     assert [row["corp_code"] for row in stored_companies] == selected_codes
-    session.commit.assert_awaited_once()
-
+    session.commit.assert_not_awaited()

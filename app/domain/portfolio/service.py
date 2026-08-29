@@ -7,6 +7,7 @@ from app.domain.portfolio.allocation import allocate_portfolio
 from app.domain.portfolio.llm_client import generate_portfolio_analysis
 from app.domain.portfolio.models import PortfolioResult, PortfolioResultCompany
 from app.domain.portfolio.prompt import build_prompt
+from app.domain.portfolio.repository import get_portfolio_result_by_share_token
 from app.domain.portfolio.schema.portfolioResult import CompanyResult, PortfolioResultResponse
 from app.domain.portfolio.schema.schemaEnum import (
     InvestmentPeriod,
@@ -14,9 +15,56 @@ from app.domain.portfolio.schema.schemaEnum import (
     RiskPreference,
     ValuationPreference,
 )
-from app.domain.rag.service import (
-    select_company_codes_with_rag
-)
+from app.domain.rag.service import select_company_codes_with_rag
+
+
+async def retrieve_portfolio_result(
+    session: AsyncSession,
+    *,
+    share_token: str,
+) -> PortfolioResultResponse | None:
+    """공유 토큰으로 저장된 포트폴리오 응답을 조립한다."""
+    portfolio_result = await get_portfolio_result_by_share_token(
+        session,
+        share_token=share_token,
+    )
+    if portfolio_result is None:
+        return None
+
+    companies = sorted(
+        portfolio_result.companies,
+        key=lambda company: (
+            company.rank_no,
+            company.corp_code,
+        ),
+    )
+
+    return PortfolioResultResponse(
+        portfolio_result_id=portfolio_result.portfolio_result_id,
+        request_id=portfolio_result.request_id,
+        total_investment=portfolio_result.total_investment,
+        average_dividend_yield=portfolio_result.average_dividend_yield,
+        average_dcf_upside=portfolio_result.average_dcf_upside,
+        valuation_analysis=portfolio_result.valuation_analysis,
+        market_indicator_analysis=portfolio_result.market_indicator_analysis,
+        allocation_analysis=portfolio_result.allocation_analysis,
+        companies=[
+            CompanyResult(
+                company_name=company.company_name,
+                corp_code=company.corp_code,
+                allocated_amount=company.allocated_amount,
+                final_score=company.final_score,
+                rank_no=company.rank_no,
+                per=company.per,
+                roe=company.roe,
+                dcf=company.dcf,
+                investment_reason=company.investment_reason,
+            )
+            for company in companies
+        ],
+        share_token=portfolio_result.share_token,
+        created_at=portfolio_result.created_at,
+    )
 
 
 async def build_portfolio_result(

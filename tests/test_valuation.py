@@ -8,12 +8,6 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import engine
-from app.domain.valuation.model import ValuationResult
-from app.domain.valuation.repository import get_valuation_inputs
-from app.domain.valuation.scripts.run_daily_valuation import (
-    refresh_all_valuation_results,
-)
-from app.domain.valuation.service import run_valuation_for_request
 from app.domain.valuation.dcf import DcfAssumptions, calculate_dcf_fair_price
 from app.domain.valuation.metrics import (
     RawValuationMetrics,
@@ -21,12 +15,18 @@ from app.domain.valuation.metrics import (
     calculate_raw_metrics,
     normalize_per,
 )
+from app.domain.valuation.model import ValuationResult
+from app.domain.valuation.repository import get_valuation_inputs
 from app.domain.valuation.scoring import (
     ScoredValuation,
     ValuationWeights,
     percentile_scores,
     score_candidates,
 )
+from app.domain.valuation.scripts.run_daily_valuation import (
+    refresh_all_valuation_results,
+)
+from app.domain.valuation.service import run_valuation_for_request
 from app.domain.valuation.weights import (
     InvestmentPreferences,
     calculate_weights,

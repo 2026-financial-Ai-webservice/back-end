@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.domain.rag.schema import ReportEvidence
 
-
 _SEARCH_CANDIDATE_REPORT_CHUNKS = text(
     """
     SELECT

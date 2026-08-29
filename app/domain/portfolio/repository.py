@@ -3,9 +3,11 @@
 from collections.abc import Sequence
 from typing import TypedDict
 
-from sqlalchemy import bindparam, text
+from sqlalchemy import bindparam, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
+from app.domain.portfolio.models import PortfolioResult
 from app.domain.portfolio.schema.portfolioCreateRequest import PortfolioCreateRequest
 from app.domain.valuation.model import PortfolioRequest
 
@@ -164,6 +166,25 @@ async def get_portfolio_company_details(
     return details
 
 
+async def get_portfolio_result_by_share_token(
+    session: AsyncSession,
+    *,
+    share_token: str,
+) -> PortfolioResult | None:
+    """공유 토큰으로 포트폴리오와 기업 결과를 조회한다."""
+    statement = (
+        select(PortfolioResult)
+        .options(
+            selectinload(PortfolioResult.companies)
+        )
+        .where(
+            PortfolioResult.share_token == share_token
+        )
+    )
+
+    return await session.scalar(statement)
+
+
 def _normalize_corp_codes(
     corp_codes: Sequence[str],
 ) -> list[str]:
@@ -196,4 +217,3 @@ def _to_optional_float(value: object) -> float | None:
         return None
 
     return float(value)
-
