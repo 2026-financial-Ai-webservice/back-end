@@ -1,4 +1,5 @@
 import secrets
+import time
 
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.domain.portfolio.allocation import allocate_portfolio
 from app.domain.portfolio.llm_client import generate_portfolio_analysis
 from app.domain.portfolio.models import PortfolioResult, PortfolioResultCompany
-from app.domain.portfolio.prompt import build_prompt
+from app.domain.portfolio.prompt import build_analysis_prompt, build_reason_prompt
 from app.domain.portfolio.repository import get_portfolio_result_by_share_token
 from app.domain.portfolio.schema.portfolioResult import CompanyResult, PortfolioResultResponse
 from app.domain.portfolio.schema.schemaEnum import (
@@ -81,6 +82,7 @@ async def build_portfolio_result(
         # roe, dcf, business_summary}}
         company_details: dict[str, dict],
 ) -> PortfolioResultResponse:
+    build_start = time.perf_counter()
     """allocation(할당 비율) 계산 -> LLM 호출 -> DB 저장 -> 최종 응답 조립"""
     candidate_codes = [
         corp_code
@@ -88,6 +90,7 @@ async def build_portfolio_result(
         if corp_code in company_details
     ]
 
+    rag_start = time.perf_counter()
     selected_codes = await select_company_codes_with_rag(
         session,
         corp_codes=candidate_codes,
@@ -108,6 +111,7 @@ async def build_portfolio_result(
         minimum_chunk_similarity=0.3,
         minimum_company_score=0.2,
     )
+    print(f"portfolio_timing step=rag elapsed={time.perf_counter() - rag_start:.3f}s")
 
     if not selected_codes:
         raise RuntimeError(
@@ -161,8 +165,12 @@ async def build_portfolio_result(
         "seed_money": seed_money,
         **user_preferences,
     }
-    prompt = build_prompt(prompt_input, companies_for_prompt)
-    llm_result = await generate_portfolio_analysis(prompt)
+    analysis_prompt = build_analysis_prompt(prompt_input, companies_for_prompt)
+    reason_prompt = build_reason_prompt(prompt_input, companies_for_prompt)
+    llm_start = time.perf_counter()
+    llm_result = await generate_portfolio_analysis(analysis_prompt, reason_prompt)
+
+    print(f"portfolio_timing step=llm elapsed={time.perf_counter() - llm_start:.3f}s")
     reason_by_code = {c.corp_code: c.investment_reason for c in llm_result.companies}
 
     # 집계값
@@ -218,7 +226,7 @@ async def build_portfolio_result(
     ]
     await session.execute(pg_insert(PortfolioResultCompany), company_rows)
 
-
+    print(f"portfolio_timing step=build_portfolio elapsed={time.perf_counter() - build_start:.3f}s")
     # API 응답 조립
     return PortfolioResultResponse(
         portfolio_result_id=result_row.portfolio_result_id,
