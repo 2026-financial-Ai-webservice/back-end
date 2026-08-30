@@ -21,6 +21,7 @@ class KisMarketDataClient:
     PRICE_TR_ID = "FHKST01010100"
     HOLIDAY_PATH = "/uapi/domestic-stock/v1/quotations/chk-holiday"
     HOLIDAY_TR_ID = "CTCA0903R"
+    AUTH_ERROR_CODES = {"EGW00121", "EGW00123"}
 
     def __init__(self, transport: httpx.AsyncBaseTransport | None = None) -> None:
         if not settings.KIS_APP_KEY or not settings.KIS_APP_SECRET:
@@ -30,12 +31,8 @@ class KisMarketDataClient:
             timeout=15.0,
             transport=transport,
         )
-        self._token = settings.KIS_ACCESS_TOKEN or None
-        self._token_expires_at = (
-            datetime.max.replace(tzinfo=UTC)
-            if self._token
-            else datetime.min.replace(tzinfo=UTC)
-        )
+        self._token: str | None = None
+        self._token_expires_at = datetime.min.replace(tzinfo=UTC)
         self._token_lock = asyncio.Lock()
         self._request_lock = asyncio.Lock()
         self._last_request_at = 0.0
@@ -66,7 +63,7 @@ class KisMarketDataClient:
             "/oauth2/tokenP",
             json={
                 "grant_type": "client_credentials",
-                "appkey": settings,
+                "appkey": settings.KIS_APP_KEY,
                 "appsecret": settings.KIS_APP_SECRET,
             },
         )
@@ -77,44 +74,61 @@ class KisMarketDataClient:
         self._token_expires_at = issued_at + timedelta(seconds=expires_in)
         return self._token
 
+    async def _invalidate_access_token(self, failed_token: str) -> None:
+        async with self._token_lock:
+            if self._token == failed_token:
+                self._token = None
+                self._token_expires_at = datetime.min.replace(tzinfo=UTC)
+
+    def _is_auth_error(self, response: httpx.Response, payload: dict[str, Any]) -> bool:
+        return (
+            response.status_code == 401
+            or payload.get("msg_cd") in self.AUTH_ERROR_CODES
+        )
+
     async def _get(
         self, path: str, tr_id: str, params: dict[str, str]
     ) -> dict[str, Any]:
-        for attempt in range(self.MAX_RATE_LIMIT_RETRIES + 1):
-            response = await self._rate_limited_get(path, tr_id, params)
-            try:
-                payload = response.json()
-            except ValueError as exc:
-                raise KisApiError(
-                    f"KIS HTTP {response.status_code}: {response.text[:500]}"
-                ) from exc
-
-            if payload.get("msg_cd") == self.RATE_LIMIT_CODE:
-                if attempt == self.MAX_RATE_LIMIT_RETRIES:
+        for auth_attempt in range(2):
+            for attempt in range(self.MAX_RATE_LIMIT_RETRIES + 1):
+                response, token = await self._rate_limited_get(path, tr_id, params)
+                try:
+                    payload = response.json()
+                except ValueError as exc:
                     raise KisApiError(
-                        f"KIS API 오류 {self.RATE_LIMIT_CODE}: {payload.get('msg1')}"
-                    )
-                await asyncio.sleep(
-                    settings.MARKET_DATA_REQUEST_INTERVAL_SECONDS * (attempt + 1)
-                )
-                continue
+                        f"KIS HTTP {response.status_code}: {response.text[:500]}"
+                    ) from exc
 
-            if response.is_error:
-                raise KisApiError(
-                    f"KIS HTTP {response.status_code}: "
-                    f"{payload.get('msg_cd')} {payload.get('msg1')}"
-                )
-            if payload.get("rt_cd") != "0":
-                raise KisApiError(
-                    f"KIS API 오류 {payload.get('msg_cd')}: {payload.get('msg1')}"
-                )
-            return payload
+                if self._is_auth_error(response, payload) and auth_attempt == 0:
+                    await self._invalidate_access_token(token)
+                    break
+
+                if payload.get("msg_cd") == self.RATE_LIMIT_CODE:
+                    if attempt == self.MAX_RATE_LIMIT_RETRIES:
+                        raise KisApiError(
+                            f"KIS API 오류 {self.RATE_LIMIT_CODE}: {payload.get('msg1')}"
+                        )
+                    await asyncio.sleep(
+                        settings.MARKET_DATA_REQUEST_INTERVAL_SECONDS * (attempt + 1)
+                    )
+                    continue
+
+                if response.is_error:
+                    raise KisApiError(
+                        f"KIS HTTP {response.status_code}: "
+                        f"{payload.get('msg_cd')} {payload.get('msg1')}"
+                    )
+                if payload.get("rt_cd") != "0":
+                    raise KisApiError(
+                        f"KIS API 오류 {payload.get('msg_cd')}: {payload.get('msg1')}"
+                    )
+                return payload
 
         raise KisApiError("KIS API 재시도 횟수를 초과했습니다.")
 
     async def _rate_limited_get(
         self, path: str, tr_id: str, params: dict[str, str]
-    ) -> httpx.Response:
+    ) -> tuple[httpx.Response, str]:
         async with self._request_lock:
             elapsed = time.monotonic() - self._last_request_at
             wait_seconds = settings.MARKET_DATA_REQUEST_INTERVAL_SECONDS - elapsed
@@ -122,11 +136,12 @@ class KisMarketDataClient:
                 await asyncio.sleep(wait_seconds)
 
             try:
-                return await self._client.get(
+                token = await self._access_token()
+                response = await self._client.get(
                     path,
                     headers={
                         "content-type": "application/json; charset=utf-8",
-                        "authorization": f"Bearer {await self._access_token()}",
+                        "authorization": f"Bearer {token}",
                         "appkey": settings.KIS_APP_KEY,
                         "appsecret": settings.KIS_APP_SECRET,
                         "tr_id": tr_id,
@@ -134,6 +149,7 @@ class KisMarketDataClient:
                     },
                     params=params,
                 )
+                return response, token
             finally:
                 self._last_request_at = time.monotonic()
 
