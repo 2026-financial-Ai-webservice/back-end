@@ -1,7 +1,6 @@
 """투자 성향에 따른 후보 기업 보고서 검색 흐름."""
 
 from collections.abc import Sequence
-from typing import Protocol
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +10,8 @@ from app.domain.portfolio.schema.schemaEnum import (
     RiskPreference,
     ValuationPreference,
 )
+from app.domain.rag.embedding_cache import get_cached_query_embeddings
+from app.domain.rag.protocols import TextEmbedder
 from app.domain.rag.query_templates import build_rag_queries
 from app.domain.rag.repository import search_candidate_report_chunks
 from app.domain.rag.schema import (
@@ -19,19 +20,6 @@ from app.domain.rag.schema import (
     ReportEvidence,
 )
 from app.domain.report.embedding import ReportEmbedder
-
-
-class TextEmbedder(Protocol):
-    """검색 문장을 임베딩할 수 있는 객체."""
-
-    async def embed_texts(
-        self,
-        texts: Sequence[str],
-    ) -> list[list[float]]:
-        ...
-
-    async def aclose(self) -> None:
-        ...
 
 
 async def retrieve_candidate_evidence(
@@ -77,9 +65,20 @@ async def retrieve_candidate_evidence(
     active_embedder = embedder or ReportEmbedder()
 
     try:
-        query_embeddings = await active_embedder.embed_texts(
-            [query["query"] for query in queries]
+        query_texts = [
+            query["query"]
+            for query in queries
+        ]
+
+        (
+            query_embeddings,
+            cache_hits,
+            cache_misses,
+        ) = await get_cached_query_embeddings(
+            embedder=active_embedder,
+            texts=query_texts,
         )
+
 
         if len(query_embeddings) != len(queries):
             raise RuntimeError(
