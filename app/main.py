@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.database import engine
+from app.core.redis import close_redis
 from app.domain.company.router import router as company_router
 from app.domain.portfolio.router import router as portfolio_router
 
@@ -16,6 +17,7 @@ from app.domain.portfolio.router import router as portfolio_router
 async def lifespan(app: FastAPI):
     # 필요 시 startup 로직 (배치 스케줄러 등록 등)
     yield
+    await close_redis()
     await engine.dispose()
 
 
