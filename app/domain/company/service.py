@@ -80,42 +80,47 @@ async def synchronize_company_industries(
             "industry_failed": 0,
         }
 
-    client = kis_client or KisClient()
     result = await session.execute(
         select(Company).where(Company.stock_code.in_(stock_codes))
     )
     companies = result.scalars().all()
 
+    owns_client = kis_client is None
+    client = kis_client or KisClient()
     updated = 0
     failed = 0
 
-    for company in companies:
-        try:
-            response = await client.get_stock_info(company.stock_code)
-            output = response.output
-            if output is None:
-                raise KisApiError("KIS API 응답에 output이 없습니다.")
+    try:
+        for company in companies:
+            try:
+                response = await client.get_stock_info(company.stock_code)
+                output = response.output
+                if output is None:
+                    raise KisApiError("KIS API 응답에 output이 없습니다.")
 
-            industry_code = normalize_industry_code(
-                output.std_idst_clsf_cd
-            )
-            company.industry_category = (
-                output.std_idst_clsf_cd_name.strip()
-                if output.std_idst_clsf_cd_name
-                else None
-            )
-            company.industry_code = industry_code
-            company.is_manufacturing = is_manufacturing(industry_code)
-            updated += 1
-        except Exception as exc:
-            failed += 1
-            logger.warning(
-                "KIS 업종정보 조회 실패: stock_code=%s, error=%s",
-                company.stock_code,
-                exc,
-            )
-        finally:
-            await asyncio.sleep(KIS_REQUEST_INTERVAL_SECONDS)
+                industry_code = normalize_industry_code(
+                    output.std_idst_clsf_cd
+                )
+                company.industry_category = (
+                    output.std_idst_clsf_cd_name.strip()
+                    if output.std_idst_clsf_cd_name
+                    else None
+                )
+                company.industry_code = industry_code
+                company.is_manufacturing = is_manufacturing(industry_code)
+                updated += 1
+            except Exception as exc:
+                failed += 1
+                logger.warning(
+                    "KIS 업종정보 조회 실패: stock_code=%s, error=%s",
+                    company.stock_code,
+                    exc,
+                )
+            finally:
+                await asyncio.sleep(KIS_REQUEST_INTERVAL_SECONDS)
+    finally:
+        if owns_client:
+            await client.aclose()
 
     try:
         await session.commit()
