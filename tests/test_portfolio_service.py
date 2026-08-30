@@ -35,13 +35,17 @@ async def test_build_portfolio_result_uses_only_rag_selected_companies(
             "00000001": {"ratio": 40.0, "amount": 400_000},
         }
 
-    def fake_build_prompt(user_input, companies):
+    def fake_build_analysis_prompt(user_input, companies):
         captured["prompt_input"] = user_input
         captured["prompt_companies"] = companies
-        return "portfolio prompt"
+        return "analysis prompt"
 
-    async def fake_generate_portfolio_analysis(prompt):
-        captured["prompt"] = prompt
+    def fake_build_reason_prompt(user_input, companies):
+        return "reason prompt"
+
+    async def fake_generate_portfolio_analysis(analysis_prompt, reason_prompt):
+        captured["analysis_prompt"] = analysis_prompt
+        captured["reason_prompt"] = reason_prompt
         return LlmAnalysisResult(
             valuation_analysis="valuation",
             market_indicator_analysis="market",
@@ -67,8 +71,13 @@ async def test_build_portfolio_result_uses_only_rag_selected_companies(
     )
     monkeypatch.setattr(
         portfolio_service,
-        "build_prompt",
-        fake_build_prompt,
+        "build_analysis_prompt",
+        fake_build_analysis_prompt,
+    )
+    monkeypatch.setattr(
+        portfolio_service,
+        "build_reason_prompt",
+        fake_build_reason_prompt,
     )
     monkeypatch.setattr(
         portfolio_service,
