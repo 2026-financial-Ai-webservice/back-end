@@ -11,22 +11,22 @@ class CompanyResult(CamelModel):
     company_name: str
     corp_code: str
     allocated_amount: int
-    final_score: int
+    final_score: float
     rank_no: int
-    per: float
-    roe: float
-    dcf: float
-    investment_reason: str
+    per: float | None
+    roe: float | None
+    dcf: float | None
+    investment_reason: str | None
 
 class PortfolioResultResponse(CamelModel):
     portfolio_result_id: int
     request_id: int
     total_investment: int
-    average_dividend_yield: float
-    average_dcf_upside: float
-    valuation_analysis: str
-    market_indicator_analysis: str
-    allocation_analysis: str
+    average_dividend_yield: float | None
+    average_dcf_upside: float | None
+    valuation_analysis: str | None
+    market_indicator_analysis: str | None
+    allocation_analysis: str | None
     companies: list[CompanyResult]
     share_token: str
     created_at: datetime.datetime

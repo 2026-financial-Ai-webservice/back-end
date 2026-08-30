@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.database import engine
 from app.domain.company.router import router as company_router
+from app.domain.portfolio.router import router as portfolio_router
 
 
 @asynccontextmanager
@@ -29,6 +30,7 @@ app.add_middleware(
 )
 
 app.include_router(company_router)
+app.include_router(portfolio_router)
 
 
 @app.get("/health")
@@ -44,6 +46,24 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "status": 400,
             "error": "Illegal Argument",
             "message": str(exc.errors()),
+            "path": request.url.path,
+        },
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "timestamp": datetime.now(UTC).isoformat(),
+            "status": exc.status_code,
+            "error": (
+                "Illegal Argument"
+                if exc.status_code == 400
+                else "Request Error"
+            ),
+            "message": str(exc.detail),
             "path": request.url.path,
         },
     )

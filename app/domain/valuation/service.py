@@ -97,8 +97,6 @@ async def run_valuation_for_request(
             results=scored_results,
         )
 
-        await session.commit()
-
         logger.info(
             "Valuation completed: "
             "request_id=%s, result_count=%s",

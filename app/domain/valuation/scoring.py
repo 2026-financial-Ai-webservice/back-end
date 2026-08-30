@@ -17,7 +17,7 @@ class ValuationWeights:
     def __post_init__(self) -> None:
         if self.dcf<0:
             raise ValueError("dcf must not be negative")
-        if self.dcf<0:
+        if self.per<0:
             raise ValueError("per must not be negative")
         if self.dividend<0:
             raise ValueError("dividend weight must not be negative")
@@ -41,7 +41,7 @@ class ScoredValuation:
     per: Decimal
     dividend: Decimal
 
-    socre: Decimal
+    score: Decimal
     rank_position: int=0
 
 

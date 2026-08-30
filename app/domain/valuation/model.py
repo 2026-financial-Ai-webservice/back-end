@@ -16,6 +16,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
+from app.domain.company.model import Company  # noqa: F401
 
 
 class ValuationResult(Base):
@@ -92,6 +93,7 @@ class ValuationResult(Base):
             name="uq_valuation_result_request_company",
         ),
     )
+
 
 class PortfolioRequest(Base):
     __tablename__ = "portfolio_request"

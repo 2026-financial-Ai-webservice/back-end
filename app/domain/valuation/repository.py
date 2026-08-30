@@ -239,7 +239,7 @@ async def get_portfolio_request_preferences_by_id(
     session: AsyncSession,
     *,
     request_id: int
-) -> list[PortfolioRequestPreferences]:
+) -> PortfolioRequestPreferences|None:
     query = text(
         """
         SELECT
@@ -257,21 +257,19 @@ async def get_portfolio_request_preferences_by_id(
         query,
         {"request_id":request_id})
     
-    row = result.mappings().all()
     row = result.mappings().one_or_none()
 
     if row is None:
         return None
     
-    return [
-        PortfolioRequestPreferences(
+    return PortfolioRequestPreferences(
             request_id=row["request_id"],
             return_preference=row["return_preference"],
             valuation_preference=row["valuation_preference"],
             investment_period=row["investment_period"],
             risk_preference=row["risk_preference"],
         )
-    ]
+    
 
 
 

@@ -3,9 +3,29 @@ from openai import AsyncOpenAI
 from app.core.config import settings
 from app.domain.portfolio.schema.llm_schema import LlmAnalysisResult
 
-_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+_client : AsyncOpenAI | None = None
+
+def get_openai_client() -> AsyncOpenAI:
+    global _client
+
+    if _client is not None:
+        return _client
+
+    if not settings.OPENAI_API_KEY:
+        raise RuntimeError(
+            "OPENAI API KEY가 설정되지 않았습니다."
+        )
+
+    _client=AsyncOpenAI(
+        api_key= settings.OPENAI_API_KEY
+    )
+
+    return _client
+
 async def generate_portfolio_analysis(prompt: str) -> LlmAnalysisResult:
-    response = await _client.beta.chat.completions.parse(
+    client = get_openai_client()
+
+    response = await client.beta.chat.completions.parse(
         model="gpt-4o-mini",
         messages=[
             {
