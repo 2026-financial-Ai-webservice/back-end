@@ -1,0 +1,3 @@
+financial_ratios 전체: 3916
+dps 채워진 행: 2319
+dps 채워진 회사 수: 604 / 829

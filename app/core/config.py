@@ -1,3 +1,4 @@
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -8,12 +9,22 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     REDIS_URL: str = "redis://localhost:6379/0"
 
+    KIS_BASE_URL: str="https://openapi.koreainvestment.com:9443"
     DART_API_KEY: str = ""
     KIS_APP_KEY: str = ""
     KIS_APP_SECRET: str = ""
+    KIS_ACCESS_TOKEN: str = ""
     KIS_ACCOUNT_NO: str = ""
 
+    MARKET_DATA_BATCH_ENABLED: bool = True
+    MARKET_DATA_BATCH_HOUR: int = 15
+    MARKET_DATA_BATCH_MINUTE: int = 40
+    MARKET_DATA_REQUEST_INTERVAL_SECONDS: float = 1.1
+
     OPENAI_API_KEY: str = ""
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
+    OPENAI_EMBEDDING_DIMENSIONS: int = 1536
+    OPENAI_EMBEDDING_BATCH_SIZE: int = 100
 
     SECRET_KEY: str = "change-me-in-production"
 
