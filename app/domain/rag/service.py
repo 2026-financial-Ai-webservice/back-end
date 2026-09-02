@@ -164,7 +164,7 @@ async def select_company_codes_with_rag(
     risk_preference: RiskPreference,
     return_preference: ReturnPreference,
     valuation_preference: ValuationPreference,
-    limit: int = 7,
+    limit: int = 5,
     top_k_per_company: int = 3,
     minimum_chunk_similarity: float | None = 0.3,
     minimum_company_score: float = 0.0,
