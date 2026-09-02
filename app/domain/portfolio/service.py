@@ -106,7 +106,7 @@ async def build_portfolio_result(
         valuation_preference=ValuationPreference(
             user_preferences["valuation_preference"]
         ),
-        limit=7,
+        limit=5,
         top_k_per_company=3,
         minimum_chunk_similarity=0.3,
         minimum_company_score=0.2,
