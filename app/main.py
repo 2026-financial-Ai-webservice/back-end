@@ -25,7 +25,7 @@ app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://2026-financial-ai-webservice.github.io/front-end"],  # 배포 시 프론트 도메인으로 제한
+    allow_origins=["https://2026-financial-ai-webservice.github.io/front-end"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
